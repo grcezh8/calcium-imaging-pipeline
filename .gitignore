@@ -1,0 +1,27 @@
+# large data files
+*.avi
+*.mp4
+*.tif
+*.tiff
+*.zarr
+*.npy
+*.npz
+*.h5
+*.hdf5
+
+# small sample data allowed
+!data_sample/**
+
+# local_config.yaml is machine-specific
+local_config.yaml
+
+# python
+__pycache__/
+*.pyc
+.env
+venv/
+.ipynb_checkpoints/
+
+# system files
+.DS_Store
+Thumbs.db
