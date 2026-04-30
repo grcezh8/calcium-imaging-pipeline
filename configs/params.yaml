@@ -1,0 +1,30 @@
+experiment:
+  mouse_ids:
+    - "mouse_01"
+    - "mouse_02"
+    - "mouse_03"
+  sessions_per_mouse: 3
+
+minian:
+  # Neuron size in pixels — IMPORTANT: measure this from your actual images
+  # Open a frame in Fiji/ImageJ, draw a line across one neuron, check its width
+  neuron_diameter: 8        # typical range: 6–14 for miniscopes
+  frame_rate: 20            # your miniscope fps — check your recording software
+  max_shift: 20             # max pixels a frame can shift during motion correction
+
+behavior:
+  # How timestamps are stored — see Section 6
+  timestamp_format: "csv"
+  behavior_fps: 30          # your behavior camera fps
+
+caltrig:
+  # These control what counts as a real calcium transient
+  # Start with these defaults, adjust after looking at your data in CalTrig
+  threshold_method: "adaptive"   # options: adaptive, manual, ml
+  min_transient_duration: 3      # minimum frames a transient must last
+  zscore_threshold: 2.5          # z-score cutoff for transient detection
+
+analysis:
+  # Window around each stimulus event to analyze
+  window_pre_seconds: 2.0    # seconds BEFORE stimulus onset
+  window_post_seconds: 4.0   # seconds AFTER stimulus onset
