@@ -23,7 +23,7 @@ import numpy as np
 
 # Tell Python where to find Minian and our utils
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.config_loader import load_config
+from oldthings.utils.config_loader import load_config
 
 cfg        = load_config()
 MINIAN_DIR = cfg['minian_dir']
