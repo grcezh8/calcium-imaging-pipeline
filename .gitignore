@@ -10,7 +10,7 @@
 *.hdf5
 
 # small sample data allowed
-!data_sample/**
+!data/sample/**
 
 # local_config.yaml is machine-specific
 local_config.yaml

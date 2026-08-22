@@ -25,6 +25,10 @@ event_manager = st.session_state.event_manager
 if "event_start_time" not in st.session_state:
     st.session_state.event_start_time = None
 
+#labels the user has defined (separate from marked event instances)
+if "event_labels" not in st.session_state:
+    st.session_state.event_labels = []
+
 #page
 st.set_page_config(
     page_title="Calcium + Behavior Viewer",
@@ -89,21 +93,20 @@ with col1:
     )
 
     #behavioral events on timeline
-    for label, event_times in event_manager.get_all_events().items():
-        for event_time in event_times:
-            ax.axvline(
-                event_time,
-                linestyle="--",
-                linewidth=1
-            )
+    for event in event_manager.get_all_events():
+        ax.axvline(
+            event["start_time"],
+            linestyle="--",
+            linewidth=1
+        )
 
-            ax.text(
-                event_time,
-                calcium.shape[1] + 1,
-                label,
-                rotation=90,
-                verticalalignment="bottom"
-            )
+        ax.text(
+            event["start_time"],
+            calcium.shape[1] + 1,
+            event["label"],
+            rotation=90,
+            verticalalignment="bottom"
+        )
 
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("ROI")
@@ -112,12 +115,16 @@ with col1:
     st.pyplot(fig, use_container_width=True)
 
     st.subheader("Marked Events")
-    for label, event_times in event_manager.get_all_events().items():
+    events_by_label = {}
+    for event in event_manager.get_all_events():
+        events_by_label.setdefault(event["label"], []).append(event["start_time"])
+
+    for label, event_times in events_by_label.items():
         st.write(
             f"**{label}**: "
             + ", ".join(
                 f"{time:.2f}s"
-                for time in event_times
+                for time in sorted(event_times)
             )
         )
 
@@ -155,43 +162,37 @@ with col3:
 #event annotation
 st.subheader("Behavioral Annotation")
 
-existing_labels = sorted(
-    set(
-        event["label"]
-        for event in event_manager.get_all_events()
-    )
-)
-
 col1, col2 = st.columns(2)
+
 with col1:
     new_event_label = st.text_input(
         "Create a new event label",
         placeholder="e.g. lever press"
     )
     if st.button("Create Event Label"):
-        if new_event_label.strip():
-            event_manager.create_label(new_event_label)
-            st.success(
-                f'Created event label: "{new_event_label.strip()}"'
-            )
+        label = new_event_label.strip()
+        if label:
+            if label not in st.session_state.event_labels:
+                st.session_state.event_labels.append(label)
+            st.success(f'Created event label: "{label}"')
         else:
             st.warning("Please enter an event name")
 
 with col2:
-    event_labels = list(event_manager.get_all_events().keys())
-    if event_labels:
+    if st.session_state.event_labels:
         selected_event = st.selectbox(
             "Event to mark",
-            event_labels
+            st.session_state.event_labels
         )
-    if st.button("Mark Event At Current Time"):
-        event_manager.add_event(
-            selected_event,
-            selected_time
-        )
-        st.success(
-            f'Marked "{selected_event}" at '
-            f'{selected_time:.2f} seconds'
-        )
+        if st.button("Mark Event At Current Time"):
+            event_manager.create_label(
+                selected_event,
+                selected_time,
+                selected_time
+            )
+            st.success(
+                f'Marked "{selected_event}" at '
+                f'{selected_time:.2f} seconds'
+            )
     else:
         st.info("Create an event label first")
