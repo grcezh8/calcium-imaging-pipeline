@@ -1,0 +1,16 @@
+# Lightweight GUI/analysis env. Never imports an extraction backend.
+#   conda env create -f envs/app.yml
+#   conda activate calcium-app
+#   pip install -e ".[gui,dev]"
+name: calcium-app
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pyside6>=6.6
+  - pyqtgraph>=0.13
+  - av>=12
+  - pytest>=8
+  - pytest-qt>=4.4
+  - pip

@@ -1,0 +1,13 @@
+# Isolated CaImAn worker env (pins match the env the CNMF-E pipeline was verified in).
+#   conda env create -f envs/caiman.yml
+#   conda activate caiman
+#   pip install -e . --no-deps
+name: caiman
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - caiman=1.12.2
+  - numpy>=1.26,<2
+  - matplotlib
+  - pip

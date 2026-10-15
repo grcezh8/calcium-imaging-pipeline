@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calcium-imaging-pipeline"
+version = "0.0.1"
+description = "Unified calcium imaging and behavior analysis platform for miniscope labs"
+readme = "README.md"
+requires-python = ">=3.11"
+# Core deps stay minimal: backend workers (e.g. CaImAn) install this package
+# into their own envs with --no-deps and must not pull in the GUI stack.
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+gui = ["PySide6>=6.6", "pyqtgraph>=0.13", "av>=12"]
+dev = ["pytest>=8", "pytest-qt>=4.4"]
+
+[project.scripts]
+calcium-platform = "pipeline.gui.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["pipeline*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

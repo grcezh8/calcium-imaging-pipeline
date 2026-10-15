@@ -274,7 +274,8 @@ Computer vision and ML tools referenced (repositories, cited from general knowle
 
 This repo is pre-v0.1 and was started under an earlier five-layer design (see git history before this README update). Functionality described above is aspirational except where noted:
 
-- [app.py](app.py) — a Streamlit viewer (working prototype) that displays synchronized calcium traces, a live dF/F heatmap, and behavior video frames side by side, with manual behavioral event annotation ([events.py](events.py)).
+- [pipeline/gui/](pipeline/gui/) — the PySide6 desktop app shell (`python -m pipeline.gui`). Empty window for now; the v0.1 viewer is built here.
+- [app.py](app.py) — a Streamlit viewer (prototype, to be retired once the PySide6 viewer reaches parity) that displays synchronized calcium traces, a live dF/F heatmap, and behavior video frames side by side, with manual behavioral event annotation ([events.py](events.py)).
 - [pipeline/calcium/](pipeline/calcium/) — **CaImAn CNMF-E extraction is implemented** (the first backend for Aim 1, not yet behind the worker/orchestrator interface). `CalciumProcessor`/`CalciumRecording`/`CalciumResult` ([base.py](pipeline/calcium/base.py)) define the interface; `CaImAnProcessor` ([caiman_processor.py](pipeline/calcium/caiman_processor.py)) implements it as a full CaImAn CNMF-E pipeline (motion correction → source extraction → ΔF/F) for single-photon miniscope movies. Run it via `scripts/run_calcium_caiman.py` inside a dedicated `caiman` conda env (CaImAn's dependencies are heavy/pinned and deliberately isolated from the lightweight env `app.py` runs in); the result is saved as a portable `.npz` ([io.py](pipeline/calcium/io.py)) that any lightweight env can read with plain `numpy`. Configured via [configs/calcium/cnmfe_default.json](configs/calcium/cnmfe_default.json) — see [configs/calcium/README.md](configs/calcium/README.md) for which parameters are rig-specific. Verify end-to-end with `python scripts/verify_calcium_caiman.py` (also inside the `caiman` env).
   - Dev/test fixture note: the DANDI dataset used elsewhere in this repo is **widefield mesoscale** imaging (its `dFF_B`/`dFF_V` traces are hemodynamic-correction channels), which doesn't match CNMF-E's single-cell 1-photon assumptions and only ships precomputed traces, not a raw movie. CaImAn extraction is developed/tested instead against CaImAn's own bundled demo movie (`data_endoscope.tif`) — this is deliberate, not an oversight; see the plan history for the reasoning.
   - Known caveat: under CNMF-E's default (ring-model) background config, CaImAn's `detrend_df_f()` has no `b`/`f` background components to normalize against, so the `dff` field is a **detrended trace, not a true F0-normalized ΔF/F** (CaImAn logs this itself: "Background components not present..."). This is why CaImAn's own CNMF-E demo never calls `detrend_df_f()` at all. Getting true ΔF/F out of CNMF-E requires a background config that retains `b`/`f` — a follow-up tuning task, not yet done.
@@ -286,9 +287,21 @@ Not yet implemented: Minian and MPS backends, the job orchestrator and adapters 
 
 ## Getting started
 
+Lab machines run Windows; macOS and Linux also work. Requires [conda/mamba](https://github.com/conda-forge/miniforge).
+
 ```bash
-pip install -r requirements.txt   # TODO: add requirements.txt
-python danditest.py               # pulls a sample calcium/behavior slice from DANDI
-python extractvideo.py            # extracts the matching video clip
-streamlit run app.py              # launch the synchronized viewer
+# App env: GUI + analysis, never imports a backend
+conda env create -f envs/app.yml
+conda activate calcium-app
+pip install -e ".[gui,dev]"
+python -m pipeline.gui            # launch the desktop app
+pytest                            # run the test suite
+
+# CaImAn worker env (only needed to run CNMF-E extraction)
+conda env create -f envs/caiman.yml
+conda activate caiman
+pip install -e . --no-deps
+python scripts/verify_calcium_caiman.py
 ```
+
+CI runs the tests on Windows and Linux for every push to `main` and every pull request.
