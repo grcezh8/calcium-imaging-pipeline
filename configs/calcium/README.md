@@ -8,7 +8,7 @@
 - `init.min_corr` / `init.min_pnr` — correlation/peak-to-noise thresholds for candidate neuron detection. Start with the defaults, then inspect the correlation/PNR summary images CaImAn prints and adjust.
 - `motion.max_shifts` — how far a frame is allowed to shift during motion correction; increase if your prep moves more than that.
 
-This mirrors the same "measure this from your actual images" guidance `oldthings/configs/params.yaml` used for Minian's `neuron_diameter`.
+This mirrors the same "measure this from your actual images" guidance the archived Minian config (`configs/params.yaml` on the `archive/oldthings` branch) used for Minian's `neuron_diameter`.
 
 **Safe to leave as-is for a first run:** everything else (`preprocess`, `temporal`, `spatial`, `patch`, `merging`, `quality` groups) — these are algorithm tuning knobs, not physical properties of your rig.
 
